@@ -16,11 +16,9 @@
 <div class="container">
 
 <h3>Selected Plan</h3>
-
 <p id="planName"></p>
 
 <h3>Amount</h3>
-
 <p id="planAmount"></p>
 
 <h3>EasyPaisa / Raast IBAN</h3>
@@ -44,13 +42,12 @@ id="phone"
 placeholder="Your Payment Phone Number"
 required>
 
-<label>
-Screenshot (Optional)
-</label>
+<label>Screenshot (Optional)</label>
 
 <input
 type="file"
-id="screenshot">
+id="screenshot"
+accept="image/*">
 
 <button type="submit">
 Submit Payment
@@ -61,22 +58,12 @@ Submit Payment
 </div>
 
 <script>
+document.getElementById("planName").textContent =
+localStorage.getItem("plan") || "";
 
-document.getElementById("planName").innerHTML =
-localStorage.getItem("plan");
-
-document.getElementById("planAmount").innerHTML =
-"Rs. " + localStorage.getItem("amount");
-
-document.getElementById("paymentForm").addEventListener("submit",(e)=>{
-
-e.preventDefault();
-
-alert("Payment Submitted Successfully.\nWaiting For Admin Approval.");
-
-window.location.href="login.html";
-
-});
+document.getElementById("planAmount").textContent =
+"Rs. " + (localStorage.getItem("amount") || "0");
+</script>
 
 <script type="module" src="js/payment.js"></script>
 
