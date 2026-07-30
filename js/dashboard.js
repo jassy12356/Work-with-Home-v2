@@ -4,8 +4,12 @@ import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/f
 
 import {
 doc,
-getDoc
+getDoc,
+updateDoc,
+increment
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
+const watchBtn = document.getElementById("watchBtn");
 
 onAuthStateChanged(auth, async(user)=>{
 
@@ -16,22 +20,67 @@ return;
 
 }
 
-const snap = await getDoc(doc(db,"users",user.uid));
+const userRef = doc(db,"users",user.uid);
 
-if(!snap.exists()) return;
+const snap = await getDoc(userRef);
+
+if(!snap.exists()){
+
+alert("User not found");
+return;
+
+}
 
 const data = snap.data();
 
-document.getElementById("userName").innerHTML = data.name;
+if(!data.paymentApproved){
 
-document.getElementById("userPlan").innerHTML = data.plan || "No Plan";
+alert("Your payment is waiting for Admin Approval.");
 
-document.getElementById("balance").innerHTML = data.balance || 0;
+window.location.href="payment.html";
+return;
+
+}
+
+document.getElementById("userName").textContent = data.name;
+document.getElementById("userPlan").textContent = data.plan;
+document.getElementById("balance").textContent = data.balance || 0;
+
+watchBtn.addEventListener("click", async()=>{
+
+let reward = 0;
+
+switch(data.plan){
+
+case "Plan 1":
+reward = 10;
+break;
+
+case "Plan 2":
+reward = 20;
+break;
+
+case "Plan 3":
+reward = 30;
+break;
+
+default:
+alert("No active plan.");
+return;
+
+}
+
+await updateDoc(userRef,{
+
+balance: increment(reward),
+videosWatched: increment(1)
 
 });
 
-document.getElementById("watchBtn").addEventListener("click",()=>{
+alert("Congratulations!\nRs. " + reward + " added to your balance.");
 
-alert("Video System will be connected in next step.");
+location.reload();
+
+});
 
 });
