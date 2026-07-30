@@ -3,56 +3,73 @@ import { auth, db } from "./firebase.js";
 import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 import {
-  doc,
-  setDoc,
-  serverTimestamp
+doc,
+setDoc,
+updateDoc,
+serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-const paymentForm = document.getElementById("paymentForm");
+const form = document.getElementById("paymentForm");
 
 onAuthStateChanged(auth, (user) => {
 
-  if (!user) {
+if(!user){
 
-    window.location.href = "login.html";
-    return;
+window.location.href="login.html";
+return;
 
-  }
+}
 
-  paymentForm.addEventListener("submit", async (e) => {
+form.addEventListener("submit", async(e)=>{
 
-    e.preventDefault();
+e.preventDefault();
 
-    const trxid = document.getElementById("trxid").value.trim();
-    const phone = document.getElementById("phone").value.trim();
+const trxid=document.getElementById("trxid").value.trim();
 
-    const plan = localStorage.getItem("plan");
-    const amount = localStorage.getItem("amount");
+const phone=document.getElementById("phone").value.trim();
 
-    try {
+const plan=localStorage.getItem("plan");
 
-      await setDoc(doc(db, "payments", user.uid), {
+const amount=localStorage.getItem("amount");
 
-        uid: user.uid,
-        plan: plan,
-        amount: amount,
-        transactionId: trxid,
-        phoneNumber: phone,
-        paymentApproved: false,
-        createdAt: serverTimestamp()
+try{
 
-      });
+await setDoc(doc(db,"payments",user.uid),{
 
-      alert("Payment Submitted Successfully.\nWaiting For Admin Approval.");
+uid:user.uid,
 
-      window.location.href = "login.html";
+plan:plan,
 
-    } catch (error) {
+amount:amount,
 
-      alert(error.message);
+transactionId:trxid,
 
-    }
+phoneNumber:phone,
 
-  });
+status:"Pending",
+
+createdAt:serverTimestamp()
+
+});
+
+await updateDoc(doc(db,"users",user.uid),{
+
+plan:plan,
+
+paymentApproved:false
+
+});
+
+alert("Payment Submitted Successfully.\nWaiting For Admin Approval.");
+
+window.location.href="login.html";
+
+}catch(error){
+
+alert(error.message);
+
+}
+
+});
 
 });
