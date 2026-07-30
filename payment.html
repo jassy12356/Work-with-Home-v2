@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Payment</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+<header>
+<h2>Complete Your Payment</h2>
+</header>
+
+<div class="container">
+
+<h3>Selected Plan</h3>
+
+<p id="planName"></p>
+
+<h3>Amount</h3>
+
+<p id="planAmount"></p>
+
+<h3>EasyPaisa / Raast IBAN</h3>
+
+<input
+type="text"
+value="PK45TMFB0000000093173459"
+readonly>
+
+<form id="paymentForm">
+
+<input
+type="text"
+id="trxid"
+placeholder="Transaction ID"
+required>
+
+<input
+type="text"
+id="phone"
+placeholder="Your Payment Phone Number"
+required>
+
+<label>
+Screenshot (Optional)
+</label>
+
+<input
+type="file"
+id="screenshot">
+
+<button type="submit">
+Submit Payment
+</button>
+
+</form>
+
+</div>
+
+<script>
+
+document.getElementById("planName").innerHTML =
+localStorage.getItem("plan");
+
+document.getElementById("planAmount").innerHTML =
+"Rs. " + localStorage.getItem("amount");
+
+document.getElementById("paymentForm").addEventListener("submit",(e)=>{
+
+e.preventDefault();
+
+alert("Payment Submitted Successfully.\nWaiting For Admin Approval.");
+
+window.location.href="login.html";
+
+});
+
+</script>
+
+</body>
+</html>
