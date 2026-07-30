@@ -1,1 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Withdraw</title>
 
+<link rel="stylesheet" href="css/style.css">
+
+</head>
+<body>
+
+<header>
+<h2>Withdraw Balance</h2>
+</header>
+
+<div class="container">
+
+<h3>Current Balance</h3>
+
+<h2 id="balance">Rs. 0</h2>
+
+<p>Minimum Withdrawal: Rs. 10000</p>
+
+<form id="withdrawForm">
+
+<input
+type="number"
+id="amount"
+placeholder="Enter Amount"
+required>
+
+<input
+type="text"
+id="account"
+placeholder="EasyPaisa Number / IBAN"
+required>
+
+<button type="submit">
+Submit Withdraw Request
+</button>
+
+</form>
+
+<p id="message"></p>
+
+</div>
+
+<script type="module" src="js/withdraw.js"></script>
+
+</body>
+</html>
