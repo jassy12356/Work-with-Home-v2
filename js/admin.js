@@ -9,17 +9,17 @@ updateDoc
 
 const paymentList = document.getElementById("paymentList");
 
-async function loadPayments() {
+async function loadPayments(){
 
-paymentList.innerHTML = "";
+paymentList.innerHTML="";
 
-const querySnapshot = await getDocs(collection(db,"payments"));
+const querySnapshot=await getDocs(collection(db,"payments"));
 
 querySnapshot.forEach((payment)=>{
 
-const data = payment.data();
+const data=payment.data();
 
-paymentList.innerHTML += `
+paymentList.innerHTML+=`
 
 <div class="plan">
 
@@ -31,16 +31,14 @@ paymentList.innerHTML += `
 
 <p><b>Phone:</b> ${data.phoneNumber}</p>
 
-<button onclick="approve('${payment.id}')">
+<p><b>Status:</b> ${data.status}</p>
 
+<button onclick="approve('${payment.id}','${data.plan}')">
 Approve
-
 </button>
 
 <button onclick="rejectPayment('${payment.id}')">
-
 Reject
-
 </button>
 
 </div>
@@ -52,23 +50,25 @@ Reject
 }
 
 loadPayments();
-window.approve = async function(paymentId){
+
+window.approve=async function(uid,plan){
 
 try{
 
-await updateDoc(doc(db,"payments",paymentId),{
+await updateDoc(doc(db,"payments",uid),{
 
+status:"Approved",
 paymentApproved:true
 
 });
 
-await updateDoc(doc(db,"users",paymentId),{
-
-paymentApproved:true,
+await updateDoc(doc(db,"users",uid),{
 
 approved:true,
-
-planActive:true
+paymentApproved:true,
+plan:plan,
+balance:0,
+videosWatched:0
 
 });
 
@@ -84,19 +84,16 @@ alert(error.message);
 
 }
 
-window.rejectPayment = async function(paymentId){
+window.rejectPayment=async function(uid){
 
-const ok = confirm("Reject this payment?");
-
-if(!ok) return;
+if(!confirm("Reject Payment?")) return;
 
 try{
 
-await updateDoc(doc(db,"payments",paymentId),{
+await updateDoc(doc(db,"payments",uid),{
 
-paymentApproved:false,
-
-rejected:true
+status:"Rejected",
+paymentApproved:false
 
 });
 
