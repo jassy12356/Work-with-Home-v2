@@ -108,3 +108,71 @@ alert(error.message);
 }
 
 }
+const withdrawList = document.getElementById("withdrawList");
+
+async function loadWithdraws() {
+
+withdrawList.innerHTML = "";
+
+const querySnapshot = await getDocs(collection(db,"withdraws"));
+
+querySnapshot.forEach((withdraw)=>{
+
+const data = withdraw.data();
+
+withdrawList.innerHTML += `
+
+<div class="plan">
+
+<h3>Withdraw Request</h3>
+
+<p><b>Amount:</b> Rs. ${data.amount}</p>
+
+<p><b>Account:</b> ${data.account}</p>
+
+<p><b>Status:</b> ${data.status}</p>
+
+<button onclick="approveWithdraw('${withdraw.id}')">
+Approve
+</button>
+
+<button onclick="rejectWithdraw('${withdraw.id}')">
+Reject
+</button>
+
+</div>
+
+`;
+
+});
+
+}
+
+loadWithdraws();
+window.approveWithdraw = async function(uid){
+
+await updateDoc(doc(db,"withdraws",uid),{
+
+status:"Approved"
+
+});
+
+alert("Withdraw Approved");
+
+location.reload();
+
+}
+
+window.rejectWithdraw = async function(uid){
+
+await updateDoc(doc(db,"withdraws",uid),{
+
+status:"Rejected"
+
+});
+
+alert("Withdraw Rejected");
+
+location.reload();
+
+}
