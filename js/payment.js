@@ -8,7 +8,7 @@ setDoc,
 updateDoc,
 serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-
+alert("payment.js loaded");
 const form = document.getElementById("paymentForm");
 
 onAuthStateChanged(auth, (user) => {
