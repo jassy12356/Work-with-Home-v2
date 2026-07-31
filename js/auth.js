@@ -85,7 +85,7 @@ return;
 
 const data = userDoc.data();
 
-window.location.href = "payment.html";
+window.location.href = "plans.html";
 
 } catch (error) {
 
