@@ -85,31 +85,7 @@ return;
 
 const data = userDoc.data();
 
-if (!data.approved) {
-
-alert("Waiting For Admin Approval");
-
-return;
-
-}
-
-if (!data.plan) {
-
-window.location.href = "plans.html";
-
-return;
-
-}
-
-if (!data.paymentApproved) {
-
 window.location.href = "payment.html";
-
-return;
-
-}
-
-window.location.href = "dashboard.html";
 
 } catch (error) {
 
