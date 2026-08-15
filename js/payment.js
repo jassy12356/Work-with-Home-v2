@@ -1,75 +1,128 @@
 import { auth, db } from "./firebase.js";
 
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import {
+    onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 import {
-doc,
-setDoc,
-updateDoc,
-serverTimestamp
+    doc,
+    setDoc,
+    updateDoc,
+    serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
-alert("payment.js loaded");
+
+
 const form = document.getElementById("paymentForm");
+
 
 onAuthStateChanged(auth, (user) => {
 
-if(!user){
+    if (!user) {
 
-window.location.href="dashboard.html";
-return;
+        window.location.href = "login.html";
+        return;
 
-}
+    }
 
-form.addEventListener("submit", async(e)=>{
 
-e.preventDefault();
+    form.addEventListener("submit", async (e) => {
 
-const trxid=document.getElementById("trxid").value.trim();
+        e.preventDefault();
 
-const phone=document.getElementById("phone").value.trim();
 
-const plan=localStorage.getItem("plan");
+        const trxid =
+            document.getElementById("trxid").value.trim();
 
-const amount=localStorage.getItem("amount");
+        const phone =
+            document.getElementById("phone").value.trim();
 
-try{
 
-await setDoc(doc(db,"payments",user.uid),{
+        const plan =
+            localStorage.getItem("plan");
 
-uid:user.uid,
+        const amount =
+            localStorage.getItem("amount");
 
-plan:plan,
 
-amount:amount,
+        if (!plan || !amount) {
 
-transactionId:trxid,
+            alert("Please select a plan first.");
+            return;
 
-phoneNumber:phone,
+        }
 
-status:"Pending",
 
-createdAt:serverTimestamp()
+        try {
 
-});
+            // Save payment
+            await setDoc(
+                doc(db, "payments", user.uid),
+                {
 
-await updateDoc(doc(db,"users",user.uid),{
+                    uid: user.uid,
 
-plan:plan,
+                    plan: plan,
 
-paymentApproved:false
+                    amount: Number(amount),
 
-});
+                    transactionId: trxid,
 
-alert("Payment Submitted Successfully.\nWaiting For Admin Approval.");
+                    phoneNumber: phone,
 
-window.location.href="login.html";
+                    status: "Submitted",
 
-}catch(error){
+                    createdAt: serverTimestamp()
 
-alert(error.message);
+                }
+            );
 
-}
 
-});
+            // Save selected plan to user
+            await updateDoc(
+                doc(db, "users", user.uid),
+                {
+
+                    plan: plan,
+
+                    planAmount: Number(amount),
+
+                    paymentSubmitted: true,
+
+                    paymentApproved: true,
+
+                    balance: 0,
+
+                    dailyEarnings: 0,
+
+                    totalEarnings: 0,
+
+                    videosWatched: 0
+
+                }
+            );
+
+
+            alert(
+                "Payment Submitted Successfully.\n\n" +
+                "Opening Dashboard..."
+            );
+
+
+            // Clear selected plan
+            localStorage.removeItem("plan");
+            localStorage.removeItem("amount");
+
+
+            // Direct dashboard
+            window.location.href = "dashboard.html";
+
+
+        } catch (error) {
+
+            alert(error.message);
+
+        }
+
+    });
 
 });
