@@ -12,33 +12,30 @@ import {
   getDocs
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
-
 const history = document.getElementById("history");
-
 
 onAuthStateChanged(auth, async (user) => {
 
   if (!user) {
+
     window.location.href = "login.html";
     return;
-  }
 
+  }
 
   try {
 
-    const withdrawalsRef =
-      collection(db, "withdraws");
-
+    const withdrawRef = collection(db, "withdraws");
 
     const q = query(
-      withdrawalsRef,
+      withdrawRef,
       where("uid", "==", user.uid),
       orderBy("createdAt", "desc")
     );
 
-
     const snapshot = await getDocs(q);
 
+    history.innerHTML = "";
 
     if (snapshot.empty) {
 
@@ -46,59 +43,59 @@ onAuthStateChanged(auth, async (user) => {
         "<p>No withdrawal history found.</p>";
 
       return;
+
     }
 
+    snapshot.forEach((docSnap) => {
 
-    history.innerHTML = "";
+      const data = docSnap.data();
 
-
-    snapshot.forEach((withdraw) => {
-
-      const data = withdraw.data();
-
-
-      let date = "Date unavailable";
-
+      let date = "Processing...";
 
       if (data.createdAt) {
 
-        date =
-          data.createdAt
-            .toDate()
-            .toLocaleString();
+        date = data.createdAt
+          .toDate()
+          .toLocaleString();
 
       }
 
+      const status =
+        data.status || "Pending";
 
-      history.innerHTML += `
+      const div = document.createElement("div");
 
-        <div class="plan">
+      div.className = "card";
 
-          <h3>
-            Rs. ${data.amount}
-          </h3>
+      div.innerHTML = `
 
-          <p>
-            <b>Account:</b>
-            ${data.account}
-          </p>
+        <h3>Withdrawal</h3>
 
-          <p>
-            <b>Date:</b>
-            ${date}
-          </p>
+        <p>
+          <b>Amount:</b>
+          Rs. ${Number(data.amount || 0)}
+        </p>
 
-          <p>
-            <b>Status:</b>
-            ${data.status}
-          </p>
+        <p>
+          <b>Account:</b>
+          ${data.account || ""}
+        </p>
 
-        </div>
+        <p>
+          <b>Date:</b>
+          ${date}
+        </p>
+
+        <p>
+          <b>Status:</b>
+          ${status}
+        </p>
 
       `;
 
-    });
+      history.appendChild(div);
 
+    });
 
   } catch (error) {
 
