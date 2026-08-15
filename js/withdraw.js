@@ -1,90 +1,106 @@
 import { auth, db } from "./firebase.js";
 
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import {
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 import {
-doc,
-getDoc,
-setDoc,
-updateDoc,
-serverTimestamp
+  collection,
+  addDoc,
+  doc,
+  getDoc,
+  updateDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
+
 
 const form = document.getElementById("withdrawForm");
 
-onAuthStateChanged(auth, async(user)=>{
+onAuthStateChanged(auth, async (user) => {
 
-if(!user){
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
 
-window.location.href="login.html";
-return;
+  const userRef = doc(db, "users", user.uid);
 
-}
+  const snap = await getDoc(userRef);
 
-const userRef = doc(db,"users",user.uid);
+  if (!snap.exists()) {
+    alert("User not found.");
+    return;
+  }
 
-const snap = await getDoc(userRef);
+  const data = snap.data();
 
-if(!snap.exists()) return;
+  let currentBalance = Number(data.balance || 0);
 
-const data = snap.data();
+  document.getElementById("balance").textContent =
+    "Rs. " + currentBalance;
 
-document.getElementById("balance").innerHTML = "Rs. " + (data.balance || 0);
 
-form.addEventListener("submit", async(e)=>{
+  form.addEventListener("submit", async (e) => {
 
-e.preventDefault();
+    e.preventDefault();
 
-const amount = Number(document.getElementById("amount").value);
+    const amount =
+      Number(document.getElementById("amount").value);
 
-const account = document.getElementById("account").value.trim();
+    const account =
+      document.getElementById("account").value.trim();
 
-if(amount < 10000){
 
-alert("Minimum withdrawal is Rs. 10000");
-return;
+    if (amount < 10000) {
+      alert("Minimum withdrawal is Rs. 10000.");
+      return;
+    }
 
-}
 
-if(amount > (data.balance || 0)){
+    if (amount > currentBalance) {
+      alert("Insufficient balance.");
+      return;
+    }
 
-alert("Insufficient balance");
-return;
 
-}
+    try {
 
-try{
+      // Create a NEW withdrawal document
+      await addDoc(
+        collection(db, "withdraws"),
+        {
+          uid: user.uid,
+          amount: amount,
+          account: account,
+          status: "Success",
+          createdAt: serverTimestamp()
+        }
+      );
 
-await setDoc(doc(db,"withdraws",user.uid),{
 
-uid:user.uid,
+      // Deduct amount from balance
+      await updateDoc(userRef, {
+        balance: currentBalance - amount
+      });
 
-amount:amount,
 
-account:account,
+      alert(
+        "Withdrawal Successful!\n\n" +
+        "Rs. " + amount +
+        " deducted from your balance."
+      );
 
-status:"Pending",
 
-createdAt:serverTimestamp()
+      window.location.href =
+        "withdraw-history.html";
 
-});
 
-await updateDoc(userRef,{
+    } catch (error) {
 
-balance:(data.balance-amount)
+      alert(error.message);
 
-});
+    }
 
-alert("Withdrawal request submitted successfully.");
-
-window.location.href="dashboard.html";
-
-}catch(error){
-
-alert(error.message);
-
-}
-
-});
+  });
 
 });
