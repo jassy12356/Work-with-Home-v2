@@ -1,86 +1,74 @@
 import { auth, db } from "./firebase.js";
 
-import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
+import {
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 
 import {
-doc,
-getDoc,
-updateDoc,
-increment
+  doc,
+  getDoc,
+  updateDoc,
+  increment
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 const watchBtn = document.getElementById("watchBtn");
 
-onAuthStateChanged(auth, async(user)=>{
+onAuthStateChanged(auth, async (user) => {
 
-if(!user){
+  if (!user) {
+    window.location.href = "login.html";
+    return;
+  }
 
-window.location.href="login.html";
-return;
+  const userRef = doc(db, "users", user.uid);
+  const snap = await getDoc(userRef);
 
-}
+  if (!snap.exists()) {
+    alert("User not found");
+    return;
+  }
 
-const userRef = doc(db,"users",user.uid);
+  const data = snap.data();
 
-const snap = await getDoc(userRef);
+  document.getElementById("userName").textContent =
+    data.name || "";
 
-if(!snap.exists()){
+  document.getElementById("userPlan").textContent =
+    data.plan || "No Plan";
 
-alert("User not found");
-return;
+  document.getElementById("balance").textContent =
+    data.balance || 0;
 
-}
+  watchBtn.addEventListener("click", async () => {
 
-const data = snap.data();
+    let reward = 0;
 
-if(!data.paymentApproved){
+    if (data.plan === "Plan 1") {
+      reward = 10;
+    }
 
-alert("Your payment is waiting for Admin Approval.");
+    if (data.plan === "Plan 2") {
+      reward = 20;
+    }
 
-window.location.href="payment.html";
-return;
+    if (data.plan === "Plan 3") {
+      reward = 30;
+    }
 
-}
+    if (reward === 0) {
+      alert("Please select a plan first.");
+      return;
+    }
 
-document.getElementById("userName").textContent = data.name;
-document.getElementById("userPlan").textContent = data.plan;
-document.getElementById("balance").textContent = data.balance || 0;
+    await updateDoc(userRef, {
+      balance: increment(reward),
+      videosWatched: increment(1)
+    });
 
-watchBtn.addEventListener("click", async()=>{
+    alert("Rs. " + reward + " added to your earnings.");
 
-let reward = 0;
+    location.reload();
 
-switch(data.plan){
-
-case "Plan 1":
-reward = 10;
-break;
-
-case "Plan 2":
-reward = 20;
-break;
-
-case "Plan 3":
-reward = 30;
-break;
-
-default:
-alert("No active plan.");
-return;
-
-}
-
-await updateDoc(userRef,{
-
-balance: increment(reward),
-videosWatched: increment(1)
-
-});
-
-alert("Congratulations!\nRs. " + reward + " added to your balance.");
-
-location.reload();
-
-});
+  });
 
 });
