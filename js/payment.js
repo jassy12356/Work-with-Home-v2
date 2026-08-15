@@ -15,7 +15,7 @@ onAuthStateChanged(auth, (user) => {
 
 if(!user){
 
-window.location.href="login.html";
+window.location.href="dashboard.html";
 return;
 
 }
